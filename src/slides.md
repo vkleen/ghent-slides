@@ -1,4 +1,5 @@
 ---
+theme: uncover
 marp: true
 style: |
   .columns {
@@ -7,11 +8,10 @@ style: |
     gap: 1rem;
   }
 ---
-<!-- footer: ![image](./res/logo_tweag_black_with_description.svg) -->
+<!-- _footer: ![image](../src/res/logo_tweag_black_with_description.svg) -->
 # Nickel + Terraform = ❤️
 
 ---
-
 # next slide
 <!--
 These should be speaker notes
