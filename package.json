@@ -11,6 +11,7 @@
     "@marp-team/marp-cli": "^2.3.0"
   },
   "marp": {
+    "html": true,
     "options": {
       "emoji": {
         "twemoji": {
