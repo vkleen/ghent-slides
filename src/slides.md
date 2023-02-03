@@ -129,12 +129,32 @@ So all of that sounds great, doesn't it?
 
 ### Sounds Great! But...
 * Can you keep individual machines declarative?
-* Can you move a deployment from one cloud to another?
 * HCL vs. YAML vs. JSON vs. ...
-* How to reuse bits and pieces, but stay flexible?
+* Can you move a deployment from one cloud to another?
 
 <!--
-But terraform doesn't really go far enough for my tastes. Even if I can specify many aspects of a machine or network of machines,
+But terraform doesn't really go far enough for my tastes. Even if I can specify many aspects of a machine or network of machines, it's pretty tricky to specify an entire machine configuration declaratively.
+> go
+
+I like to use NixOS for that; integrating it with Terraform can be a bit tricky. My far out hope for this project is to eventually make this integration seamless. But it's not there yet and I won't show an attempt at it here.
+
+Let me just say that for something like that to work well, it would be really useful to configure the machines in the same language, in fact in the same place, as the network and supporting infrastructure they should live in. Speaking of language...
+> go
+
+Imagine you want a cluster of machines. So you set up a network and a bunch of VMs in Terraform with HCL.
+
+And then you want your cluster to run Kubernetes. So you start diving into configuring K8s with YAML.
+
+And then your actual app needs configuring in JSON.
+
+Where's the actual source of truth in a setup like that? All those configurations are probably depend on each other.
+> go
+
+And now you need to switch your cloud provider for whatever reason. Suddenly you need new Terraform providers, and new resource configurations and so on.
+
+So, as you can tell, I'm somewhat dissatisfied with this state of affairs. And I'm not looking for solutions specific to these problems; although I'd love to talk to you about ideas, I'm sure there's lots I could learn. I'm really looking for a generic way to tackle things like this. So what do I really want?
+> go
+
 -->
 
 ---
@@ -143,6 +163,24 @@ But terraform doesn't really go far enough for my tastes. Even if I can specify 
 * Single source of truth
 * Schemas that follow _my_ requirements
 * Extensibility and Reusability
+
+<!--
+I want...
+> go
+
+a single source of truth. Write a configuration that can be used to generate all the specifics.
+> go
+
+I want that configuration to be structured in the way that makes the most sense for my application. It shouldn't be tied to a specific cloud API or specific orchestration tools.
+> go
+
+I want the configuration to be easily extensible and as reusable as possible. Of course there will always be tradeoffs there. But I want reusing and adapting a configuration to be as seamless as I can make it.
+
+So, I've tried to explore this. My approach here focuses on using a single language for describing the source of truth. And what do I need from this language? Well, it needs to be powerful enough to express all the nonsense that I'm up to. And it should be powerful enough to describe the transformations for feeding the configuration into Terraform, K8s, whatever.
+
+So I've given it away already, of course. I tried to use Nickel for that.
+> go
+-->
 
 ---
 
@@ -169,6 +207,13 @@ let AppSchema = {
 
 <div class="rdiv nickel-logo"> <img src="res/nickel-logo-2.svg"/> </div>
 
+<!--
+Nickel is being developed at Tweag. Our goal is to make a language that can be used to write complex configurations in a modular and correct way. And I hope I'll be able to show you an example of that.
+
+So what is this Nickel language about?
+> go 2x
+-->
+
 ---
 
 ## Nickel
@@ -176,6 +221,19 @@ let AppSchema = {
 * and types
 * but only when they help
 
+<!--
+Nickel is based on a JSON-like data model. And to ensure that it will be powerful enough to do anything you, well I, would want to do with it, we add functions.
+> go
+
+And to help keep me from shooting myself in the foot, we add types.
+> go
+
+But too many types can be annoying, so we spend a lot of time designing the language to get out of your way while keeping with the correctness goal.
+
+So that was of course pretty useless as a first introduction. So let me try to give you a really quick crash course. At least you'll see the syntax before diving into my Terraform example.
+> go
+
+-->
 ---
 
 ### Crash Course on Nickel
@@ -258,7 +316,9 @@ One of the core design goals of Nickel is to make this kind of "recursive overri
 Idiomatic Nickel, if there is such a thing already, is expressing the final configuration as a recursively defined record
 If you need to transform it for a specific consumer, make a new field that is a function of the relevant other fields
 
-The next step in Nickel are custom data validation functions, to be applied to record fields. We call them contracts.
+Writing configurations as recursive records is the key to modularity in Nickel, and Yann is going to tell you more about that paradigm. 
+
+I also said I want to write correct configuration. Nickel helps with correctness in two ways. There's a static type system that I'm going to ignore right now. And there are custom data validation functions, to be applied to record fields. We call them contracts.
 > go
 -->
 
@@ -366,7 +426,7 @@ It turns out, the logic to do that takes 60 lines of Nickel code, but I won't tr
 
 Now, I'm not counting a significant amount of contortions to make Terraform actually understand well. My excuse is that those are pretty much generic for all providers and I already have a tool to generate them. You could probably do without, if you don't want the genericity.
 
-Because of those contortions, I've packaged the required tooling using nix. Some of you were here Bryan's talk right before mine, you'll have a head start. Demo time!
+Because of those contortions, I've packaged the required tooling using nix. I imagine, some of you were here for Bryan's talk right before mine, you'll have a head start. Demo time!
 > go
 -->
 
@@ -378,9 +438,13 @@ Because of those contortions, I've packaged the required tooling using nix. Some
 ---
 
 ### Summary
-* Structure your configuration how _you_ want
-* Enforce custom properties early
-* Reuse with small changes using recursive overriding
+- Structure your configuration how _you_ want
+- Enforce custom properties early
+- Reuse with small changes using recursive overriding
+
+<!--
+
+-->
 
 ---
 
