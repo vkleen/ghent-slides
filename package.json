@@ -15,7 +15,7 @@
     "options": {
       "emoji": {
         "twemoji": {
-          "base": "/res/twemoji/",
+          "base": "res/twemoji/",
           "ext": "svg"
         }
       }

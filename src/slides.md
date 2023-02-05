@@ -443,15 +443,31 @@ Because of those contortions, I've packaged the required tooling using nix. I im
 - Reuse with small changes using recursive overriding
 
 <!--
+To summarize: you can structure the source of truth in a configuration the way you need to for your usecase. In the example it was a contrived record of users. But you could imagine a specification of a network of machines in a way that makes sense to you. Or something even more complicated.
 
+The point is, you can take that configuration and then write code that massages and elaborates it into a format that your downstream tools need. Here, I'm targeting terraform provider. But in fact I'd really like even more intergrations, especially for things like Kubernetes. Eventually, it would be awesome to be able to use a Nickel base configuration to drive deploying a Kubernetes cluster with containers built out of nix packages using Terraform.
+
+And to make something like that fun I really want to put custom property checks in my configuration. And Nickel contracts give me that power. I can start gaining confidence that things are going to work before I have to start spinning up a bunch of resources just to have a typo make it fail at the last second.
+
+But it's not just trying to ensure deploying won't fail. If you have use case specific requirements, you can put those into Nickel contracts. And then you gain some confidence that those requirements won't be violated if you're able to evaluate the configuration.
+
+Finally, you can use recursive overriding to reuse configurations while making some changes. For example, say you actually jumped in and made a production deployment using Nickel. Of course, you'd want a testing environment as well, and you'woudln't want to make significant changes when moving from testing into production. But maybe you want to tag every resource in the testing environment in a special way. Or something else, whatever you come up with. To do that you would just take your single config and merge it with something that sets the tags you want. And suddenly you can test exactly what you would push to production, but with some small changes.
+
+> go
 -->
 
 ---
 
 ### Try it!
 ```
-nix flake init -t github:tweag/tf-ncl/intro-docs
+nix flake init -t github:tweag/tf-ncl/intro-docs#hello-tf
 nix run .#terraform -- hello-tf.ncl init
 nix run .#terraform -- hello-tf.ncl apply
 ```
 And pester me with issues!
+
+<!--
+So thanks for listening! And please try it out and find all the bugs that I've hidden in it. And then tell me about it. That last part's the most important.
+
+You can also replace hello-tf with github-users to get all the code used in the demo. In case you want to fact-check me.
+-->
